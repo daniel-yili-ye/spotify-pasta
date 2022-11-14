@@ -30,30 +30,33 @@ export default function Home() {
   };
 
   return (
-    <main className="">
+    <main className="flex flex-col items-center space-y-8 container mx-auto my-20">
       <h1 className="text-6xl font-bold">Spotify Pasta</h1>
       {accessToken ? (
-        <div className="">
-          <form onSubmit={makePlaylist}>
-            <label htmlFor="copypasta">Copypasta Text:</label>
-            <textarea id="copypasta" name="copypasta" />
-            <button
-              type="submit"
-              className="rounded-full p-3 bg-green-500 text-white font-medium"
-            >
-              Create Playlist
-            </button>
-          </form>
-        </div>
-      ) : (
-        <div className="">
+        <form
+          onSubmit={makePlaylist}
+          className="space-y-8 flex flex-col items-center"
+        >
+          <textarea
+            id="copypasta"
+            name="copypasta"
+            className="border-4 rounded-xl border-black p-4 w-96 h-48"
+            placeholder="Your copy🍝 text..."
+          />
           <button
-            onClick={requestAuthorization}
-            className="rounded-full p-3 bg-green-500 text-white font-medium"
+            type="submit"
+            className="rounded-full p-4 bg-green-500 font-bold w-96"
           >
-            Authorize Spotify Account
+            CREATE PLAYLIST
           </button>
-        </div>
+        </form>
+      ) : (
+        <button
+          onClick={requestAuthorization}
+          className="rounded-full p-4 bg-green-500 font-bold w-96"
+        >
+          LOGIN TO SPOTIFY
+        </button>
       )}
     </main>
   );
