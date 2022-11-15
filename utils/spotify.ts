@@ -1,5 +1,14 @@
 const BASE_URI = `https://api.spotify.com/v1`;
 
+export const requestAuthorization = () => {
+  const url = `https://accounts.spotify.com/authorize?client_id=${
+    process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID
+  }&response_type=code&redirect_uri=${encodeURI(
+    "http://localhost:3000/"
+  )}&show_dialog=true&scope=playlist-modify-public`;
+  window.location.href = url; // Show Spotify's authorization screen
+};
+
 export const getTokens = async (authorization_code: string) => {
   const basic = Buffer.from(
     `${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID}:${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET}`
@@ -22,7 +31,7 @@ export const getTokens = async (authorization_code: string) => {
 
 export const createPlaylist = async (user_id, name) => {
   const tokens = localStorage.getItem("tokens");
-  JSON.parse(tokens!).access_token;
+  const access_token = JSON.parse(tokens!).access_token;
 
   return await fetch(`${BASE_URI}/users/${user_id}/playlists`, {
     method: "POST",
@@ -36,10 +45,7 @@ export const createPlaylist = async (user_id, name) => {
   });
 };
 
-export const getUserInfo = async () => {
-  const tokens = localStorage.getItem("tokens");
-  const access_token = JSON.parse(tokens!).access_token;
-
+export const getUserInfo = async (access_token: string) => {
   const response = await fetch(`${BASE_URI}/me`, {
     method: "GET",
     headers: {
@@ -51,8 +57,25 @@ export const getUserInfo = async () => {
   return response.json();
 };
 
-export const makePlaylist = async () => {
-  const user_info = await getUserInfo();
-  const user_id = user_info;
-  console.log(user_id);
+export const makePlaylist = async (
+  event,
+  access_token: string,
+  user_id: string
+) => {
+  event.preventDefault();
+  const response = await fetch("/api/playlist", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      access_token: access_token,
+      user_id: user_id,
+      title: event.target.title.value,
+      description: event.target.description.value,
+      copypasta: event.target.copypasta.value,
+    }),
+  });
+  const data = await response.json();
+  console.log(data);
 };

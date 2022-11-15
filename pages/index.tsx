@@ -1,9 +1,19 @@
-import { getTokens, makePlaylist } from "../lib/spotify";
+import {
+  requestAuthorization,
+  getTokens,
+  getUserInfo,
+  makePlaylist,
+} from "../utils/spotify";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import Spinner from "../components/Spinner";
 
 export default function Home() {
   const dataFetchedRef = useRef(false);
   const [accessToken, setAccessToken] = useState();
+  const [displayName, setDisplayName] = useState();
+  const [userID, setUserID] = useState();
+  const router = useRouter();
 
   useEffect(() => {
     if (dataFetchedRef.current) return;
@@ -17,39 +27,70 @@ export default function Home() {
         setAccessToken(tokens.access_token);
       };
       fetchTokens(authorization_code);
+      router.replace("/", undefined, { shallow: true });
     }
   }, []);
 
-  const requestAuthorization = () => {
-    const url = `https://accounts.spotify.com/authorize?client_id=${
-      process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID
-    }&response_type=code&redirect_uri=${encodeURI(
-      "http://localhost:3000/"
-    )}&show_dialog=true&scope=playlist-modify-public`;
-    window.location.href = url; // Show Spotify's authorization screen
-  };
+  useEffect(() => {
+    if (!accessToken) return;
+    const fetchUserInfo = async () => {
+      const user_info = await getUserInfo(accessToken);
+      const display_name = user_info!.display_name;
+      const id = user_info!.id;
+      setDisplayName(display_name);
+      setUserID(id);
+    };
+    fetchUserInfo();
+  }, [accessToken]);
 
   return (
-    <main className="flex flex-col items-center space-y-8 container mx-auto my-20">
+    <main className="flex flex-col items-center space-y-8 container mx-auto my-10">
       <h1 className="text-6xl font-bold">Spotify Pasta</h1>
-      {accessToken ? (
-        <form
-          onSubmit={makePlaylist}
-          className="space-y-8 flex flex-col items-center"
-        >
-          <textarea
-            id="copypasta"
-            name="copypasta"
-            className="border-4 rounded-xl border-black p-4 w-96 h-48"
-            placeholder="Your copy🍝 text..."
-          />
-          <button
-            type="submit"
-            className="rounded-full p-4 bg-green-500 font-bold w-96"
+      {accessToken && userID ? (
+        <div className="space-y-4">
+          <div className="text-xl flex font-bold">{displayName}</div>
+          <form
+            onSubmit={(event) => makePlaylist(event, accessToken, userID)}
+            className="space-y-4 flex flex-col items-center"
           >
-            CREATE PLAYLIST
-          </button>
-        </form>
+            <div className="flex flex-col space-y-1">
+              <label htmlFor="title">Playlist Name</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                className="border-4 rounded-xl border-black p-2 w-96"
+                placeholder="Enter your playlist name here..."
+              />
+            </div>
+            <div className="flex flex-col space-y-1">
+              <label htmlFor="description">Description</label>
+              <input
+                type="text"
+                id="description"
+                name="description"
+                className="border-4 rounded-xl border-black p-2 w-96"
+                placeholder="Enter your playlist description here..."
+              />
+            </div>
+            <div className="flex flex-col space-y-1">
+              <label htmlFor="copypasta">Song Names</label>
+              <textarea
+                id="copypasta"
+                name="copypasta"
+                className="border-4 rounded-xl border-black p-2 w-96 h-48"
+                placeholder="Enter your song names here..."
+              />
+            </div>
+            <br />
+            <button
+              type="submit"
+              className="rounded-full p-4 bg-green-500 font-bold w-96"
+            >
+              CREATE PLAYLIST
+            </button>
+          </form>
+        </div>
       ) : (
         <button
           onClick={requestAuthorization}
