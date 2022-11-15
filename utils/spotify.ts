@@ -29,22 +29,6 @@ export const getTokens = async (authorization_code: string) => {
   return response.json();
 };
 
-export const createPlaylist = async (user_id, name) => {
-  const tokens = localStorage.getItem("tokens");
-  const access_token = JSON.parse(tokens!).access_token;
-
-  return await fetch(`${BASE_URI}/users/${user_id}/playlists`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-      "Content-Type": "application/json",
-    },
-    body: new URLSearchParams({
-      name: name,
-    }),
-  });
-};
-
 export const getUserInfo = async (access_token: string) => {
   const response = await fetch(`${BASE_URI}/me`, {
     method: "GET",
