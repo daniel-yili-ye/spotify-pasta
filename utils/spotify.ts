@@ -60,6 +60,6 @@ export const makePlaylist = async (
       copypasta: event.target.copypasta.value,
     }),
   });
-  const data = await response.json();
+  const data = response.json();
   console.log(data);
 };

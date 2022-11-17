@@ -4,7 +4,7 @@ import {
   getUserInfo,
   makePlaylist,
 } from "../utils/spotify";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { useRouter } from "next/router";
 import Spinner from "../components/Spinner";
 
@@ -14,6 +14,7 @@ export default function Home() {
   const [displayName, setDisplayName] = useState();
   const [userID, setUserID] = useState();
   const router = useRouter();
+  // implement useContext hook to track login
 
   useEffect(() => {
     if (dataFetchedRef.current) return;
